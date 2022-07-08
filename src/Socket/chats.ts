@@ -464,11 +464,10 @@ export const makeChatsSocket = (config: SocketConfig) => {
 
 		await (
 			mutationMutex.mutex(
-				() => resyncAppState(ALL_WA_PATCH_NAMES, ctx)
-			)
-				.catch(err => (
+				() => resyncAppState(ALL_WA_PATCH_NAMES, ctx).catch(err => (
 					onUnexpectedError(err, 'main app sync')
 				))
+			)
 		)
 	}
 
@@ -477,6 +476,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 		// resend available presence to update name on servers
 		if(actions.credsUpdates.me?.name && markOnlineOnConnect) {
 			sendPresenceUpdate('available')
+				.catch(err => onUnexpectedError(err, 'sending available persistence update'))
 		}
 	}
 
@@ -670,8 +670,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 			const name = update.attrs.name as WAPatchName
 			mutationMutex.mutex(() => (
 				resyncAppState([name], undefined)
-					.catch(err => logger.error({ trace: err.stack, node }, 'failed to sync state'))
-			))
+			)).catch(err => onUnexpectedError(err, `sync state from node: ${node}`))
 		}
 	})
 

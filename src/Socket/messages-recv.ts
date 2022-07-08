@@ -291,6 +291,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			ev.emit('messages.media-update', [event])
 		} else if(nodeType === 'encrypt') {
 			handleEncryptNotification(node)
+				.catch(err => logger.error({ node, trace: err.stack }, 'error in handling encrypt notification'))
 		} else if(nodeType === 'devices') {
 			const devices = getBinaryNodeChildren(child, 'device')
 			if(areJidsSameUser(child.attrs.jid, authState.creds!.me!.id)) {
@@ -500,7 +501,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 								logger.debug({ stanza }, 'connection closed, ignoring retry req')
 							}
 						}
-					)
+					).catch(err => logger.error({ state: ws.readyState, trace: err.stack }, 'error when retrying request'))
 				} else {
 					// no type in the receipt => message delivered
 					let type: MessageReceiptType = undefined
