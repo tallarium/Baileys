@@ -43,11 +43,11 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 	const appStateSyncTimeout = debouncedTimeout(
 		6_000,
 		() => {
-			timeoutAppState().catch(err => onUnexpectedError(err, 'timing out app state'))
+			resyncAppState().catch(err => onUnexpectedError(err, 'resyncing app state'))
 		}
 	)
 
-	async function timeoutAppState() {
+	async function resyncAppState() {
 		logger.info(
 			{ recvChats: Object.keys(recvChats).length },
 			'doing initial app state sync'
