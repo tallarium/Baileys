@@ -165,8 +165,8 @@ export const prepareWAMessageMedia = async(
 			}
 		})(),
 	])
-		.finally(
-			async() => {
+		.finally(() => {
+			const cleanup = async() => {
 				encWriteStream.destroy()
 				// remove tmp files
 				if(didSaveToTmpPath && bodyPath) {
@@ -174,7 +174,11 @@ export const prepareWAMessageMedia = async(
 					logger?.debug('removed tmp files')
 				}
 			}
+
+			cleanup().catch((err) => logger.error(JSON.stringify(err), 'Error during cleanup'))
+		}
 		)
+
 
 	delete uploadData.media
 

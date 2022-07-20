@@ -42,19 +42,23 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 
 	const appStateSyncTimeout = debouncedTimeout(
 		6_000,
-		async() => {
-			logger.info(
-				{ recvChats: Object.keys(recvChats).length },
-				'doing initial app state sync'
-			)
-			if(ws.readyState === ws.OPEN) {
-				await resyncMainAppState(recvChats)
-			}
-
-			historyCache.clear()
-			recvChats = { }
+		() => {
+			timeoutAppState().catch(err => onUnexpectedError(err, 'timing out app state'))
 		}
 	)
+
+	async function timeoutAppState() {
+		logger.info(
+			{ recvChats: Object.keys(recvChats).length },
+			'doing initial app state sync'
+		)
+		if(ws.readyState === ws.OPEN) {
+			await resyncMainAppState(recvChats)
+		}
+
+		historyCache.clear()
+		recvChats = { }
+	}
 
 	const msgRetryMap = config.msgRetryCounterMap || { }
 	const callOfferData: { [id: string]: WACallEvent } = { }
@@ -530,7 +534,12 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			)
 	})
 
-	ws.on('CB:call', async(node: BinaryNode) => {
+	ws.on('CB:call', (node: BinaryNode) => {
+		handleCallNode(node)
+			.catch(err => logger.error({ node, trace: err.stack }, 'error when handling call node'))
+	})
+
+	async function handleCallNode(node: BinaryNode) {
 		const { attrs } = node
 		const [infoChild] = getAllBinaryNodeChildren(node)
 		const callId = infoChild.attrs['call-id']
@@ -568,7 +577,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			.catch(
 				error => onUnexpectedError(error, 'ack call')
 			)
-	})
+	}
 
 	ws.on('CB:receipt', node => {
 		handleReceipt(node)
@@ -577,14 +586,19 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			)
 	})
 
-	ws.on('CB:notification', async(node: BinaryNode) => {
+	ws.on('CB:notification', (node: BinaryNode) => {
+		handleNotificationNode(node)
+			.catch(err => logger.error({ node, trace: err.stack }, 'error when handling notification node'))
+	})
+
+	async function handleNotificationNode(node: BinaryNode) {
 		handleNotification(node)
 			.catch(
 				error => {
 					onUnexpectedError(error, 'handling notification')
 				}
 			)
-	})
+	}
 
 	ev.on('messages.upsert', data => {
 		handleUpsertedMessages(data)
