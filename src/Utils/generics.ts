@@ -222,16 +222,19 @@ export function bindWaitForEvent<T extends keyof BaileysEventMap<any>>(ev: Commo
 export const bindWaitForConnectionUpdate = (ev: CommonBaileysEventEmitter<any>) => bindWaitForEvent(ev, 'connection.update')
 
 export const printQRIfNecessaryListener = (ev: CommonBaileysEventEmitter<any>, logger: Logger) => {
-	ev.on('connection.update', async({ qr }) => {
-		if(qr) {
-			const QR = await import('qrcode-terminal')
-				.catch(err => {
-					logger.error('QR code terminal not added as dependency')
-				})
-			QR?.generate(qr, { small: true })
-		}
+	ev.on('connection.update', ({ qr }) => {
+		printQrInTerminal(qr)
+			.catch((err: Error) => logger.error(JSON.stringify(err), 'Error when printing QR in terminal'))
 	})
 }
+
+async function printQrInTerminal(qr: string) {
+	if(qr) {
+		const QR = await import('qrcode-terminal')
+		QR?.generate(qr, { small: true })
+	}
+}
+
 
 /**
  * utility that fetches latest baileys version from the master branch.

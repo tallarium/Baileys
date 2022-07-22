@@ -464,11 +464,10 @@ export const makeChatsSocket = (config: SocketConfig) => {
 
 		await (
 			mutationMutex.mutex(
-				() => resyncAppState(ALL_WA_PATCH_NAMES, ctx)
-			)
-				.catch(err => (
+				() => resyncAppState(ALL_WA_PATCH_NAMES, ctx).catch(err => (
 					onUnexpectedError(err, 'main app sync')
 				))
+			)
 		)
 	}
 
@@ -477,6 +476,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 		// resend available presence to update name on servers
 		if(actions.credsUpdates.me?.name && markOnlineOnConnect) {
 			sendPresenceUpdate('available')
+				.catch(err => onUnexpectedError(err, 'sending available persistence update'))
 		}
 	}
 
@@ -642,7 +642,12 @@ export const makeChatsSocket = (config: SocketConfig) => {
 	ws.on('CB:presence', handlePresenceUpdate)
 	ws.on('CB:chatstate', handlePresenceUpdate)
 
-	ws.on('CB:ib,,dirty', async(node: BinaryNode) => {
+	ws.on('CB:ib,,dirty', (node: BinaryNode) => {
+		syncNodeHandler(node)
+			.catch(err => onUnexpectedError(err, `processing sync node: ${node}`))
+	})
+
+	async function syncNodeHandler(node: BinaryNode) {
 		const { attrs } = getBinaryNodeChild(node, 'dirty')
 		const type = attrs.type
 		switch (type) {
@@ -662,7 +667,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 			logger.info({ node }, 'received unknown sync')
 			break
 		}
-	})
+	}
 
 	ws.on('CB:notification,type:server_sync', (node: BinaryNode) => {
 		const update = getBinaryNodeChild(node, 'collection')
@@ -670,8 +675,7 @@ export const makeChatsSocket = (config: SocketConfig) => {
 			const name = update.attrs.name as WAPatchName
 			mutationMutex.mutex(() => (
 				resyncAppState([name], undefined)
-					.catch(err => logger.error({ trace: err.stack, node }, 'failed to sync state'))
-			))
+			)).catch(err => onUnexpectedError(err, `sync state from node: ${node}`))
 		}
 	})
 

@@ -418,13 +418,23 @@ export const makeSocket = ({
 	}
 
 	ws.on('message', onMessageRecieved)
-	ws.on('open', validateConnection)
+	ws.on('open', () => {
+		validateConnection()
+			.catch(err => {
+				onUnexpectedError(err, 'validating connection')
+			})
+	})
 	ws.on('error', error => end(new Boom(`WebSocket Error (${error.message})`, { statusCode: 500, data: error })))
 	ws.on('close', () => end(new Boom('Connection Terminated', { statusCode: DisconnectReason.connectionClosed })))
 	// the server terminated the connection
 	ws.on('CB:xmlstreamend', () => end(new Boom('Connection Terminated by Server', { statusCode: DisconnectReason.connectionClosed })))
 	// QR gen
-	ws.on('CB:iq,type:set,pair-device', async(stanza: BinaryNode) => {
+	ws.on('CB:iq,type:set,pair-device', (stanza: BinaryNode) => {
+		emitQrCode(stanza)
+			.catch(err => onUnexpectedError(err, 'emitting QR code'))
+	})
+
+	async function emitQrCode(stanza: BinaryNode) {
 		const iq: BinaryNode = {
 			tag: 'iq',
 			attrs: {
@@ -463,10 +473,16 @@ export const makeSocket = ({
 		}
 
 		genPairQR()
-	})
+	}
+
 	// device paired for the first time
 	// if device pairs successfully, the server asks to restart the connection
-	ws.on('CB:iq,,pair-success', async(stanza: BinaryNode) => {
+	ws.on('CB:iq,,pair-success', (stanza: BinaryNode) => {
+		onSuccessfulPair(stanza)
+			.catch(err => onUnexpectedError(err, 'pairing on success'))
+	})
+
+	async function onSuccessfulPair(stanza: BinaryNode) {
 		logger.debug('pair success recv')
 		try {
 			const { reply, creds: updatedCreds } = configureSuccessfulPairing(stanza, creds)
@@ -484,9 +500,14 @@ export const makeSocket = ({
 			logger.info({ trace: error.stack }, 'error in pairing')
 			end(error)
 		}
-	})
+	}
+
 	// login complete
-	ws.on('CB:success', async() => {
+	ws.on('CB:success', () => {
+		onSuccess().catch(err => onUnexpectedError(err, 'on success'))
+	})
+
+	async function onSuccess() {
 		await uploadPreKeysToServerIfRequired()
 		await sendPassiveIq('active')
 
@@ -494,7 +515,7 @@ export const makeSocket = ({
 		clearTimeout(qrTimer) // will never happen in all likelyhood -- but just in case WA sends success on first try
 
 		ev.emit('connection.update', { connection: 'open' })
-	})
+	}
 
 	ws.on('CB:ib,,offline', (node: BinaryNode) => {
 		const child = getBinaryNodeChild(node, 'offline')

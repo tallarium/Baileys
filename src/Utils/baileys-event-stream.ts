@@ -4,6 +4,7 @@ import { writeFile } from 'fs/promises'
 import { createInterface } from 'readline'
 import type { CommonBaileysEventEmitter } from '../Types'
 import { delay } from './generics'
+import logger from './logger'
 import { makeMutex } from './make-mutex'
 
 /**
@@ -24,7 +25,7 @@ export const captureEventStream = (ev: CommonBaileysEventEmitter<any>, filename:
 			async() => {
 				await writeFile(filename, content, { flag: 'a' })
 			}
-		)
+		).catch((err: Error) => logger.error(JSON.stringify(err), 'Error when writing event stream state to file'))
 
 		return result
 	}
