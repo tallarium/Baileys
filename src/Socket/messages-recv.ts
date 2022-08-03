@@ -102,7 +102,10 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		const isGroup = !!node.attrs.participant
 		const { account, signedPreKey, signedIdentityKey: identityKey } = authState.creds
 
-		const deviceIdentity = proto.ADVSignedDeviceIdentity.encode(account).finish()
+		const deviceIdentity = proto.ADVSignedDeviceIdentity.encode({
+			...account,
+			accountSignatureKey: undefined
+		}).finish()
 		await authState.keys.transaction(
 			async() => {
 				const { update, preKeys } = await getNextPreKeys(authState, 1)
