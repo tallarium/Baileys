@@ -292,16 +292,18 @@ export const makeSocket = ({
 		clearInterval(keepAliveReq)
 		clearTimeout(qrTimer)
 
-		ws.removeAllListeners('close')
-		ws.removeAllListeners('error')
-		ws.removeAllListeners('open')
-		ws.removeAllListeners('message')
-
 		if(ws.readyState !== ws.CLOSED && ws.readyState !== ws.CLOSING) {
 			try {
 				ws.close()
 			} catch{ }
 		}
+
+		process.nextTick(() => {
+			ws.removeAllListeners('close')
+			ws.removeAllListeners('error')
+			ws.removeAllListeners('open')
+			ws.removeAllListeners('message')
+		});
 
 		ev.emit('connection.update', {
 			connection: 'close',
