@@ -210,11 +210,17 @@ export const makeSocket = (config: SocketConfig) => {
 		}
 
 		const msgId = node.attrs.id
-		const wait = waitForMessage(msgId, timeoutMs)
+
+		let waitForMessageErr
+		const wait = waitForMessage(msgId, timeoutMs).catch(err => waitForMessageErr = err)
 
 		await sendNode(node)
 
 		const result = await (wait as Promise<BinaryNode>)
+		if(waitForMessageErr) {
+			throw waitForMessageErr
+		}
+
 		if('tag' in result) {
 			assertNodeErrorFree(result)
 		}
