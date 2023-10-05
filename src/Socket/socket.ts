@@ -66,6 +66,7 @@ export const makeSocket = (config: SocketConfig) => {
 		transactionOpts,
 		qrTimeout,
 		makeSignalRepository,
+		unexpectedErrorHandler
 	} = config
 
 	let url = typeof waWebSocketUrl === 'string' ? new URL(waWebSocketUrl) : waWebSocketUrl
@@ -137,7 +138,7 @@ export const makeSocket = (config: SocketConfig) => {
 	}
 
 	/** log & process any unexpected errors */
-	const onUnexpectedError = (err: Error | Boom, msg: string) => {
+	const onUnexpectedError = unexpectedErrorHandler ? unexpectedErrorHandler : (err: Error | Boom, msg: string) => {
 		logger.error(
 			{ err },
 			`unexpected error in '${msg}'`
