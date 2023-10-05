@@ -854,7 +854,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			}
 
 			const protoMsg = proto.WebMessageInfo.fromObject(msg)
-			upsertMessage(protoMsg, call.offline ? 'append' : 'notify')
+			upsertMessage(protoMsg, call.offline ? 'append' : 'notify').catch(e => onUnexpectedError(e, 'upserting call'))
 		}
 	})
 
