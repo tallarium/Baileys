@@ -20,7 +20,7 @@ export const captureEventStream = (ev: BaileysEventEmitter, filename: string) =>
 		const content = JSON.stringify({ timestamp: Date.now(), event: args[0], data: args[1] }) + '\n'
 		const result = oldEmit.apply(ev, args)
 
-		writeMutex.mutex(
+		void writeMutex.mutex(
 			async() => {
 				await writeFile(filename, content, { flag: 'a' })
 			}

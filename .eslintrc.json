@@ -27,6 +27,8 @@
                 "selector": "TSEnumDeclaration",
                 "message": "Don't declare enums, use literals instead"
             }
-        ]
+        ],
+        "@typescript-eslint/no-misused-promises": ["error"],
+        "@typescript-eslint/no-floating-promises": ["error"]
     }
 }
