@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { AxiosRequestConfig } from 'axios';
+import axios, { AxiosRequestConfig } from 'axios';
 import { KeyPair, SignedKeyPair, SocketConfig } from '../Types';
 export declare const makeRegistrationSocket: (config: SocketConfig) => {
     register: (code: string) => Promise<ExistsResponse>;
@@ -120,7 +120,7 @@ export declare const makeRegistrationSocket: (config: SocketConfig) => {
     sendNode: (frame: import("../WABinary").BinaryNode) => Promise<void>;
     logout: (msg?: string | undefined) => Promise<void>;
     end: (error: Error | undefined) => void;
-    onUnexpectedError: (err: Error | import("@hapi/boom").Boom<any>, msg: string) => void;
+    onUnexpectedError: (err: Error | import("@hapi/boom").Boom<any> | axios.AxiosError<unknown, any>, msg: string) => void;
     uploadPreKeys: (count?: number) => Promise<void>;
     uploadPreKeysToServerIfRequired: () => Promise<void>;
     requestPairingCode: (phoneNumber: string) => Promise<string>;
