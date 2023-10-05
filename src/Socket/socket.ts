@@ -365,16 +365,18 @@ export const makeSocket = (config: SocketConfig) => {
 		clearInterval(keepAliveReq)
 		clearTimeout(qrTimer)
 
-		ws.removeAllListeners('close')
-		ws.removeAllListeners('error')
-		ws.removeAllListeners('open')
-		ws.removeAllListeners('message')
-
 		if(!ws.isClosed && !ws.isClosing) {
 			try {
 				ws.close()
 			} catch{ }
 		}
+
+		process.nextTick(() => {
+			ws.removeAllListeners('close')
+			ws.removeAllListeners('error')
+			ws.removeAllListeners('open')
+			ws.removeAllListeners('message')
+		});
 
 		ev.emit('connection.update', {
 			connection: 'close',
