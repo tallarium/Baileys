@@ -1,5 +1,6 @@
 
-import { AxiosRequestConfig } from 'axios'
+import { Boom } from '@hapi/boom'
+import { AxiosError, AxiosRequestConfig } from 'axios'
 import type { Agent } from 'https'
 import type { Logger } from 'pino'
 import type { URL } from 'url'
@@ -115,6 +116,8 @@ export type SocketConfig = {
     getMessage: (key: proto.IMessageKey) => Promise<proto.IMessage | undefined>
 
     makeSignalRepository: (auth: SignalAuthState) => SignalRepository
+
+    unexpectedErrorHandler?: (err: Error | Boom | AxiosError, msg: string) => void
 
     /** Socket passthrough */
     socket?: any
