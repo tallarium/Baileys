@@ -3,6 +3,7 @@ import axios, { AxiosRequestConfig } from 'axios'
 import { randomBytes } from 'crypto'
 import { platform, release } from 'os'
 import { Logger } from 'pino'
+import QR from 'qrcode-terminal'
 import { proto } from '../../WAProto'
 import { version as baileysVersion } from '../Defaults/baileys-version.json'
 import { BaileysEventEmitter, BaileysEventMap, DisconnectReason, WACallUpdateType, WAVersion } from '../Types'
@@ -209,15 +210,10 @@ export function bindWaitForEvent<T extends keyof BaileysEventMap>(ev: BaileysEve
 
 export const bindWaitForConnectionUpdate = (ev: BaileysEventEmitter) => bindWaitForEvent(ev, 'connection.update')
 
-export const printQRIfNecessaryListener = (ev: BaileysEventEmitter, logger: Logger) => {
+export const printQRIfNecessaryListener = (ev: BaileysEventEmitter, _: Logger) => {
 	ev.on('connection.update', async({ qr }) => {
 		if(qr) {
-			const QR = await import('qrcode-terminal')
-				.then(m => m.default || m)
-				.catch(() => {
-					logger.error('QR code terminal not added as dependency')
-				})
-			QR?.generate(qr, { small: true })
+			QR.generate(qr, { small: true })
 		}
 	})
 }
