@@ -40,7 +40,7 @@ export declare function promiseTimeout<T>(ms: number | undefined, promise: (reso
 export declare const generateMessageID: () => string;
 export declare function bindWaitForEvent<T extends keyof BaileysEventMap>(ev: BaileysEventEmitter, event: T): (check: (u: BaileysEventMap[T]) => boolean | undefined, timeoutMs?: number) => Promise<void>;
 export declare const bindWaitForConnectionUpdate: (ev: BaileysEventEmitter) => (check: (u: Partial<import("../Types").ConnectionState>) => boolean | undefined, timeoutMs?: number) => Promise<void>;
-export declare const printQRIfNecessaryListener: (ev: BaileysEventEmitter, logger: Logger) => void;
+export declare const printQRIfNecessaryListener: (ev: BaileysEventEmitter, _: Logger) => void;
 /**
  * utility that fetches latest baileys version from the master branch.
  * Use to ensure your WA connection is always on the latest version
