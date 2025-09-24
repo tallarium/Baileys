@@ -721,8 +721,12 @@ export const makeSocket = (config: SocketConfig) => {
 	})
 	// login complete
 	ws.on('CB:success', async() => {
-		await uploadPreKeysToServerIfRequired()
-		await sendPassiveIq('active')
+		try {
+			await uploadPreKeysToServerIfRequired()
+			await sendPassiveIq('active')
+		} catch (err) {
+			logger.warn({ err }, 'failed to send initial passive iq')
+		}
 
 		logger.info('opened connection to WA')
 		clearTimeout(qrTimer) // will never happen in all likelyhood -- but just in case WA sends success on first try
