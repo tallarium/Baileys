@@ -120,7 +120,7 @@ declare const makeWASocket: (config: UserFacingSocketConfig) => {
     logout: (msg?: string | undefined) => Promise<void>;
     end: (error: Error | undefined) => void;
     onUnexpectedError: (err: Error | import("@hapi/boom").Boom<any> | import("axios").AxiosError<unknown, any>, msg: string) => void;
-    uploadPreKeys: (count?: number) => Promise<void>;
+    uploadPreKeys: (count?: number, retryCount?: number) => Promise<void>;
     uploadPreKeysToServerIfRequired: () => Promise<void>;
     requestPairingCode: (phoneNumber: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => boolean | undefined, timeoutMs?: number | undefined) => Promise<void>;

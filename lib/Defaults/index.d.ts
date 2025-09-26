@@ -275,6 +275,8 @@ export declare const MEDIA_HKDF_KEY_MAPPING: {
 export declare const MEDIA_KEYS: ("ppic" | "product" | "image" | "video" | "sticker" | "audio" | "gif" | "ptt" | "thumbnail-document" | "thumbnail-image" | "thumbnail-link" | "thumbnail-video" | "md-app-state" | "md-msg-hist" | "document" | "product-catalog-image" | "payment-bg-image")[];
 export declare const MIN_PREKEY_COUNT = 5;
 export declare const INITIAL_PREKEY_COUNT = 30;
+export declare const UPLOAD_TIMEOUT = 30000;
+export declare const MIN_UPLOAD_INTERVAL = 5000;
 export declare const DEFAULT_CACHE_TTLS: {
     SIGNAL_STORE: number;
     MSG_RETRY: number;

@@ -33,7 +33,7 @@ export declare const makeSocket: (config: SocketConfig) => {
     logout: (msg?: string) => Promise<void>;
     end: (error: Error | undefined) => void;
     onUnexpectedError: (err: Error | Boom<any> | import("axios").AxiosError<unknown, any>, msg: string) => void;
-    uploadPreKeys: (count?: number) => Promise<void>;
+    uploadPreKeys: (count?: number, retryCount?: number) => Promise<void>;
     uploadPreKeysToServerIfRequired: () => Promise<void>;
     requestPairingCode: (phoneNumber: string) => Promise<string>;
     /** Waits for the connection to WA to reach a state */
