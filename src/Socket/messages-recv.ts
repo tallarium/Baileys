@@ -126,12 +126,12 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		await query(stanza)
 	}
 
-	const sendRetryRequest = async(node: BinaryNode, forceIncludeKeys = false) => {
+	const sendRetryRequest = async(node: BinaryNode, forceIncludeKeys = false, errorMessage = "") => {
 		const msgId = node.attrs.id
 
 		let retryCount = msgRetryCache.get<number>(msgId) || 0
 		if(retryCount >= 5) {
-			logger.debug({ retryCount, msgId }, 'reached retry limit, clearing')
+			logger.debug({ retryCount, msgId, errorMessage }, 'reached retry limit, clearing')
 			msgRetryCache.del(msgId)
 			return
 		}
@@ -701,7 +701,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 								}
 
 								const encNode = getBinaryNodeChild(node, 'enc')
-								await sendRetryRequest(node, !encNode)
+								await sendRetryRequest(node, !encNode, errorMessage)
 								if (retryRequestDelayMs) {
 									await delay(retryRequestDelayMs)
 								}
@@ -710,7 +710,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 								// Still attempt retry even if pre-key upload failed
 								try {
 									const encNode = getBinaryNodeChild(node, 'enc')
-									await sendRetryRequest(node, !encNode)
+									await sendRetryRequest(node, !encNode, errorMessage)
 								} catch (retryErr) {
 									logger.error({ retryErr }, 'Failed to send retry after error handling')
 								}
