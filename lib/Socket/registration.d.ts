@@ -18,7 +18,7 @@ export declare const makeRegistrationSocket: (config: SocketConfig) => {
     }>;
     productUpdate: (productId: string, update: import("../Types").ProductUpdate) => Promise<import("../Types").Product>;
     sendMessageAck: ({ tag, attrs }: import("../WABinary").BinaryNode) => Promise<void>;
-    sendRetryRequest: (node: import("../WABinary").BinaryNode, forceIncludeKeys?: boolean) => Promise<void>;
+    sendRetryRequest: (node: import("../WABinary").BinaryNode, forceIncludeKeys?: boolean, errorMessage?: string) => Promise<void>;
     rejectCall: (callId: string, callFrom: string) => Promise<void>;
     getPrivacyTokens: (jids: string[]) => Promise<import("../WABinary").BinaryNode>;
     assertSessions: (jids: string[], force: boolean) => Promise<boolean>;

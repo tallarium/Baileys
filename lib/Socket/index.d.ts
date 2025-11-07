@@ -17,7 +17,7 @@ declare const makeWASocket: (config: UserFacingSocketConfig) => {
     }>;
     productUpdate: (productId: string, update: import("../Types").ProductUpdate) => Promise<import("../Types").Product>;
     sendMessageAck: ({ tag, attrs }: import("../index").BinaryNode) => Promise<void>;
-    sendRetryRequest: (node: import("../index").BinaryNode, forceIncludeKeys?: boolean) => Promise<void>;
+    sendRetryRequest: (node: import("../index").BinaryNode, forceIncludeKeys?: boolean, errorMessage?: string) => Promise<void>;
     rejectCall: (callId: string, callFrom: string) => Promise<void>;
     getPrivacyTokens: (jids: string[]) => Promise<import("../index").BinaryNode>;
     assertSessions: (jids: string[], force: boolean) => Promise<boolean>;
