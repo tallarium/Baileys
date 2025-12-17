@@ -5086,47 +5086,50 @@ export namespace proto {
 
         /** Properties of a HistorySyncConfig. */
         interface IHistorySyncConfig {
-
-            /** HistorySyncConfig fullSyncDaysLimit */
             fullSyncDaysLimit?: (number|null);
-
-            /** HistorySyncConfig fullSyncSizeMbLimit */
             fullSyncSizeMbLimit?: (number|null);
-
-            /** HistorySyncConfig storageQuotaMb */
             storageQuotaMb?: (number|null);
-
-            /** HistorySyncConfig inlineInitialPayloadInE2EeMsg */
             inlineInitialPayloadInE2EeMsg?: (boolean|null);
-
-            /** HistorySyncConfig recentSyncDaysLimit */
             recentSyncDaysLimit?: (number|null);
+            supportCallLogHistory?: (boolean|null);
+            supportBotUserAgentChatHistory?: (boolean|null);
+            supportCagReactionsAndPolls?: (boolean|null);
+            supportBizHostedMsg?: (boolean|null);
+            supportRecentSyncChunkMessageCountTuning?: (boolean|null);
+            supportHostedGroupMsg?: (boolean|null);
+            supportFbidBotChatHistory?: (boolean|null);
+            supportAddOnHistorySyncMigration?: (boolean|null);
+            supportMessageAssociation?: (boolean|null);
+            supportGroupHistory?: (boolean|null);
+            onDemandReady?: (boolean|null);
+            supportGuestChat?: (boolean|null);
+            completeOnDemandReady?: (boolean|null);
+            thumbnailSyncDaysLimit?: (number|null);
         }
 
         /** Represents a HistorySyncConfig. */
         class HistorySyncConfig implements IHistorySyncConfig {
 
-            /**
-             * Constructs a new HistorySyncConfig.
-             * @param [properties] Properties to set
-             */
-            constructor(properties?: proto.DeviceProps.IHistorySyncConfig);
-
-            /** HistorySyncConfig fullSyncDaysLimit. */
-            public fullSyncDaysLimit: number;
-
-            /** HistorySyncConfig fullSyncSizeMbLimit. */
-            public fullSyncSizeMbLimit: number;
-
-            /** HistorySyncConfig storageQuotaMb. */
-            public storageQuotaMb: number;
-
-            /** HistorySyncConfig inlineInitialPayloadInE2EeMsg. */
-            public inlineInitialPayloadInE2EeMsg: boolean;
-
-            /** HistorySyncConfig recentSyncDaysLimit. */
-            public recentSyncDaysLimit: number;
-
+            constructor(p?: proto.DeviceProps.IHistorySyncConfig);
+            public fullSyncDaysLimit?: (number|null);
+            public fullSyncSizeMbLimit?: (number|null);
+            public storageQuotaMb?: (number|null);
+            public inlineInitialPayloadInE2EeMsg?: (boolean|null);
+            public recentSyncDaysLimit?: (number|null);
+            public supportCallLogHistory?: (boolean|null);
+            public supportBotUserAgentChatHistory?: (boolean|null);
+            public supportCagReactionsAndPolls?: (boolean|null);
+            public supportBizHostedMsg?: (boolean|null);
+            public supportRecentSyncChunkMessageCountTuning?: (boolean|null);
+            public supportHostedGroupMsg?: (boolean|null);
+            public supportFbidBotChatHistory?: (boolean|null);
+            public supportAddOnHistorySyncMigration?: (boolean|null);
+            public supportMessageAssociation?: (boolean|null);
+            public supportGroupHistory?: (boolean|null);
+            public onDemandReady?: (boolean|null);
+            public supportGuestChat?: (boolean|null);
+            public completeOnDemandReady?: (boolean|null);
+            public thumbnailSyncDaysLimit?: (number|null);
             /**
              * Creates a new HistorySyncConfig instance using the specified properties.
              * @param [properties] Properties to set

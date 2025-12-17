@@ -93,6 +93,20 @@ export const generateRegistrationNode = (
 		os: config.browser[0],
 		platformType: proto.DeviceProps.PlatformType.DESKTOP,
 		requireFullSync: config.syncFullHistory,
+		historySyncConfig: {
+			storageQuotaMb: 10240,
+			inlineInitialPayloadInE2EeMsg: true,
+			recentSyncDaysLimit: undefined,
+			supportCallLogHistory: false,
+			supportBotUserAgentChatHistory: true,
+			supportCagReactionsAndPolls: true,
+			supportBizHostedMsg: true,
+			supportRecentSyncChunkMessageCountTuning: true,
+			supportHostedGroupMsg: true,
+			supportFbidBotChatHistory: true,
+			supportAddOnHistorySyncMigration: undefined,
+			supportMessageAssociation: true,
+		},
 	}
 
 	const companionProto = proto.DeviceProps.encode(companion).finish()
