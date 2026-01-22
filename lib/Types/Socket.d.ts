@@ -1,4 +1,5 @@
-import type { AxiosRequestConfig } from 'axios';
+import type { Boom } from '@hapi/boom';
+import type { AxiosError, AxiosRequestConfig } from 'axios';
 import type { Agent } from 'https';
 import type { URL } from 'url';
 import { proto } from '../../WAProto/index.js';
@@ -118,5 +119,8 @@ export type SocketConfig = {
     /** cached group metadata, use to prevent redundant requests to WA & speed up msg sending */
     cachedGroupMetadata: (jid: string) => Promise<GroupMetadata | undefined>;
     makeSignalRepository: (auth: SignalAuthState) => SignalRepository;
+    unexpectedErrorHandler?: (err: Error | Boom | AxiosError, msg: string) => void;
+    /** Socket passthrough */
+    socket?: any;
 };
 //# sourceMappingURL=Socket.d.ts.map
