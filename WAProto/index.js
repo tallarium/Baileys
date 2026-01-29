@@ -92833,6 +92833,7 @@ $root.proto = (function() {
          * @property {boolean|null} [fromMe] MessageKey fromMe
          * @property {string|null} [id] MessageKey id
          * @property {string|null} [participant] MessageKey participant
+         * @property {string|null} [senderPn] MessageKey senderPn
          */
 
         /**
@@ -92883,6 +92884,14 @@ $root.proto = (function() {
         MessageKey.prototype.participant = "";
 
         /**
+         * MessageKey senderPn.
+         * @member {string} senderPn
+         * @memberof proto.MessageKey
+         * @instance
+         */
+        MessageKey.prototype.senderPn = "";
+
+        /**
          * Creates a new MessageKey instance using the specified properties.
          * @function create
          * @memberof proto.MessageKey
@@ -92914,6 +92923,8 @@ $root.proto = (function() {
                 writer.uint32(/* id 3, wireType 2 =*/26).string(message.id);
             if (message.participant != null && message.hasOwnProperty("participant"))
                 writer.uint32(/* id 4, wireType 2 =*/34).string(message.participant);
+            if (message.senderPn != null && message.hasOwnProperty("senderPn"))
+                writer.uint32(/* id 5, wireType 2 =*/42).string(message.senderPn);
             return writer;
         };
 
@@ -92959,6 +92970,9 @@ $root.proto = (function() {
                     break;
                 case 4:
                     message.participant = reader.string();
+                    break;
+                case 5:
+                    message.senderPn = reader.string();
                     break;
                 default:
                     reader.skipType(tag & 7);
@@ -93007,6 +93021,9 @@ $root.proto = (function() {
             if (message.participant != null && message.hasOwnProperty("participant"))
                 if (!$util.isString(message.participant))
                     return "participant: string expected";
+            if (message.senderPn != null && message.hasOwnProperty("senderPn"))
+                if (!$util.isString(message.senderPn))
+                    return "senderPn: string expected";
             return null;
         };
 
@@ -93030,6 +93047,8 @@ $root.proto = (function() {
                 message.id = String(object.id);
             if (object.participant != null)
                 message.participant = String(object.participant);
+            if (object.senderPn != null)
+                message.senderPn = String(object.senderPn);
             return message;
         };
 
@@ -93051,6 +93070,7 @@ $root.proto = (function() {
                 object.fromMe = false;
                 object.id = "";
                 object.participant = "";
+                object.senderPn = "";
             }
             if (message.remoteJid != null && message.hasOwnProperty("remoteJid"))
                 object.remoteJid = message.remoteJid;
@@ -93060,6 +93080,8 @@ $root.proto = (function() {
                 object.id = message.id;
             if (message.participant != null && message.hasOwnProperty("participant"))
                 object.participant = message.participant;
+            if (message.senderPn != null && message.hasOwnProperty("senderPn"))
+                object.senderPn = message.senderPn;
             return object;
         };
 

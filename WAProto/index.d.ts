@@ -34161,6 +34161,9 @@ export namespace proto {
 
         /** MessageKey participant */
         participant?: (string|null);
+
+        /** MessageKey senderPn */
+        senderPn?: (string|null);
     }
 
     /** Represents a MessageKey. */
@@ -34183,6 +34186,9 @@ export namespace proto {
 
         /** MessageKey participant. */
         public participant: string;
+
+        /** MessageKey senderPn. */
+        public senderPn: string;
 
         /**
          * Creates a new MessageKey instance using the specified properties.
