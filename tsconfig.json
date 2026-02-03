@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
+    "module": "commonjs",
+    "moduleResolution": "node",
     "outDir": "lib",
     "declaration": true,
     "sourceMap": true,
@@ -13,7 +13,6 @@
     "rootDir": "./src",
 
     // ESM Features
-    "verbatimModuleSyntax": true,
     "allowImportingTsExtensions": true,
     "noEmit": true,
 
