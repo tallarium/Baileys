@@ -1083,7 +1083,9 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 						continue
 					}
 
+					ev.buffer()
 					await nodeProcessor(node)
+					ev.flush()
 				}
 
 				isProcessing = false
