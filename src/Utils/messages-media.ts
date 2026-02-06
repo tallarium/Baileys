@@ -125,6 +125,7 @@ export const extractImageThumb = async (bufferOrFilePath: Readable | Buffer | st
 	if (bufferOrFilePath instanceof Readable) {
 		bufferOrFilePath = await toBuffer(bufferOrFilePath)
 	}
+
 	const img = sharp(bufferOrFilePath)
 	const dimensions = await img.metadata()
 
@@ -135,7 +136,7 @@ export const extractImageThumb = async (bufferOrFilePath: Readable | Buffer | st
 			width: dimensions.width,
 			height: dimensions.height
 		}
-		}
+	}
 }
 
 export const encodeBase64EncodedStringForUpload = (b64: string) =>
@@ -158,8 +159,7 @@ export const generateProfilePicture = async (
 		buffer = await toBuffer(stream)
 	}
 
-	let img: Promise<Buffer>
-	img = sharp(buffer)
+	const img: Promise<Buffer> = sharp(buffer)
 		.resize(w, h)
 		.jpeg({
 			quality: 50
