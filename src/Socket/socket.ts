@@ -50,7 +50,7 @@ import { WebSocketClient } from './Client'
  * - query phone connection
  */
 
-export const makeSocket = (config: SocketConfig) => {
+export const makeSocket = async (config: SocketConfig) => {
 	const {
 		waWebSocketUrl,
 		connectTimeoutMs,
@@ -84,7 +84,7 @@ export const makeSocket = (config: SocketConfig) => {
 
 	const ws = new WebSocketClient(url, config)
 
-	ws.connect()
+	await ws.connect()
 
 	const ev = makeEventBuffer(logger)
 	/** ephemeral key pair used to encrypt/decrypt communication. Unique for each connection */
@@ -221,6 +221,38 @@ export const makeSocket = (config: SocketConfig) => {
 		return result
 	}
 
+	const end = (error: Error | undefined) => {
+		if (closed) {
+			logger.trace({ trace: error?.stack }, 'connection already closed')
+			return
+		}
+
+		closed = true
+		logger.info({ trace: error?.stack }, error ? 'connection errored' : 'connection closed')
+
+		clearInterval(keepAliveReq)
+		clearTimeout(qrTimer)
+
+		if (!ws.isClosed && !ws.isClosing) {
+			ws.close().catch(e => onUnexpectedError(e, 'when closing socket'))
+		}
+
+		process.nextTick(() => {
+			ws.removeAllListeners('close')
+			ws.removeAllListeners('open')
+			ws.removeAllListeners('message')
+		})
+
+		ev.emit('connection.update', {
+			connection: 'close',
+			lastDisconnect: {
+				error,
+				date: new Date()
+			}
+		})
+		ev.removeAllListeners('connection.update')
+	}
+
 	/** connection handshake */
 	const validateConnection = async () => {
 		let helloMsg: proto.IHandshakeMessage = {
@@ -257,7 +289,7 @@ export const makeSocket = (config: SocketConfig) => {
 				}
 			}).finish()
 		)
-		noise.finishInit()
+		noise.finishInit().catch(e => end(e))
 		startKeepAliveRequest()
 	}
 
@@ -298,76 +330,44 @@ export const makeSocket = (config: SocketConfig) => {
 	}
 
 	const onMessageReceived = (data: Buffer) => {
-		noise.decodeFrame(data, frame => {
-			// reset ping timeout
-			lastDateRecv = new Date()
+		noise
+			.decodeFrame(data, frame => {
+				// reset ping timeout
+				lastDateRecv = new Date()
 
-			let anyTriggered = false
+				let anyTriggered = false
 
-			anyTriggered = ws.emit('frame', frame)
-			// if it's a binary node
-			if (!(frame instanceof Uint8Array)) {
-				const msgId = frame.attrs.id
+				anyTriggered = ws.emit('frame', frame)
+				// if it's a binary node
+				if (!(frame instanceof Uint8Array)) {
+					const msgId = frame.attrs.id
 
-				if (logger.level === 'trace') {
-					logger.trace({ xml: binaryNodeToString(frame), msg: 'recv xml' })
+					if (logger.level === 'trace') {
+						logger.trace({ xml: binaryNodeToString(frame), msg: 'recv xml' })
+					}
+
+					/* Check if this is a response to a message we sent */
+					anyTriggered = ws.emit(`${DEF_TAG_PREFIX}${msgId}`, frame) || anyTriggered
+					/* Check if this is a response to a message we are expecting */
+					const l0 = frame.tag
+					const l1 = frame.attrs || {}
+					const l2 = Array.isArray(frame.content) ? frame.content[0]?.tag : ''
+
+					for (const key of Object.keys(l1)) {
+						anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}:${l1[key]},${l2}`, frame) || anyTriggered
+						anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}:${l1[key]}`, frame) || anyTriggered
+						anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}`, frame) || anyTriggered
+					}
+
+					anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},,${l2}`, frame) || anyTriggered
+					anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0}`, frame) || anyTriggered
+
+					if (!anyTriggered && logger.level === 'debug') {
+						logger.debug({ unhandled: true, msgId, fromMe: false, frame }, 'communication recv')
+					}
 				}
-
-				/* Check if this is a response to a message we sent */
-				anyTriggered = ws.emit(`${DEF_TAG_PREFIX}${msgId}`, frame) || anyTriggered
-				/* Check if this is a response to a message we are expecting */
-				const l0 = frame.tag
-				const l1 = frame.attrs || {}
-				const l2 = Array.isArray(frame.content) ? frame.content[0]?.tag : ''
-
-				for (const key of Object.keys(l1)) {
-					anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}:${l1[key]},${l2}`, frame) || anyTriggered
-					anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}:${l1[key]}`, frame) || anyTriggered
-					anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},${key}`, frame) || anyTriggered
-				}
-
-				anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0},,${l2}`, frame) || anyTriggered
-				anyTriggered = ws.emit(`${DEF_CALLBACK_PREFIX}${l0}`, frame) || anyTriggered
-
-				if (!anyTriggered && logger.level === 'debug') {
-					logger.debug({ unhandled: true, msgId, fromMe: false, frame }, 'communication recv')
-				}
-			}
-		})
-	}
-
-	const end = (error: Error | undefined) => {
-		if (closed) {
-			logger.trace({ trace: error?.stack }, 'connection already closed')
-			return
-		}
-
-		closed = true
-		logger.info({ trace: error?.stack }, error ? 'connection errored' : 'connection closed')
-
-		clearInterval(keepAliveReq)
-		clearTimeout(qrTimer)
-
-		if (!ws.isClosed && !ws.isClosing) {
-			try {
-				ws.close()
-			} catch {}
-		}
-
-		process.nextTick(() => {
-			ws.removeAllListeners('close')
-			ws.removeAllListeners('open')
-			ws.removeAllListeners('message')
-		})
-
-		ev.emit('connection.update', {
-			connection: 'close',
-			lastDisconnect: {
-				error,
-				date: new Date()
-			}
-		})
-		ev.removeAllListeners('connection.update')
+			})
+			.catch(e => end(e))
 	}
 
 	const waitForSocketOpen = async () => {
@@ -668,7 +668,7 @@ export const makeSocket = (config: SocketConfig) => {
 			tag: 'ib',
 			attrs: {},
 			content: [{ tag: 'offline_batch', attrs: { count: '100' } }]
-		})
+		}).catch(e => end(e))
 	})
 
 	ws.on('CB:ib,,edge_routing', (node: BinaryNode) => {

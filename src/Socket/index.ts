@@ -3,7 +3,7 @@ import type { UserFacingSocketConfig } from '../Types'
 import { makeCommunitiesSocket } from './communities'
 
 // export the last socket layer
-const makeWASocket = (config: UserFacingSocketConfig) => {
+const makeWASocket = async (config: UserFacingSocketConfig) => {
 	const newConfig = {
 		...DEFAULT_CONNECTION_CONFIG,
 		...config
@@ -15,7 +15,7 @@ const makeWASocket = (config: UserFacingSocketConfig) => {
 		newConfig.shouldSyncHistoryMessage = () => !!newConfig.syncFullHistory
 	}
 
-	return makeCommunitiesSocket(newConfig)
+	return await makeCommunitiesSocket(newConfig)
 }
 
 export default makeWASocket

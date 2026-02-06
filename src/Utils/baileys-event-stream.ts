@@ -4,6 +4,7 @@ import { writeFile } from 'fs/promises'
 import { createInterface } from 'readline'
 import type { BaileysEventEmitter } from '../Types'
 import { delay } from './generics'
+import { ILogger } from './logger'
 import { makeMutex } from './make-mutex'
 
 /**
@@ -11,7 +12,7 @@ import { makeMutex } from './make-mutex'
  * @param ev The event emitter to read events from
  * @param filename File to save to
  */
-export const captureEventStream = (ev: BaileysEventEmitter, filename: string) => {
+export const captureEventStream = (ev: BaileysEventEmitter, filename: string, logger: ILogger) => {
 	const oldEmit = ev.emit
 	// write mutex so data is appended in order
 	const writeMutex = makeMutex()
@@ -20,9 +21,11 @@ export const captureEventStream = (ev: BaileysEventEmitter, filename: string) =>
 		const content = JSON.stringify({ timestamp: Date.now(), event: args[0], data: args[1] }) + '\n'
 		const result = oldEmit.apply(ev, args as any)
 
-		writeMutex.mutex(async () => {
-			await writeFile(filename, content, { flag: 'a' })
-		})
+		writeMutex
+			.mutex(async () => {
+				await writeFile(filename, content, { flag: 'a' })
+			})
+			.catch(e => logger.error(`error when writing to events file ${JSON.stringify(e)}`))
 
 		return result
 	}

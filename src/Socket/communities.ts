@@ -19,8 +19,8 @@ import {
 } from '../WABinary'
 import { makeBusinessSocket } from './business'
 
-export const makeCommunitiesSocket = (config: SocketConfig) => {
-	const sock = makeBusinessSocket(config)
+export const makeCommunitiesSocket = async (config: SocketConfig) => {
+	const sock = await makeBusinessSocket(config)
 	const { authState, ev, query, upsertMessage } = sock
 
 	const communityQuery = async (jid: string, type: 'get' | 'set', content: BinaryNode[]) =>
