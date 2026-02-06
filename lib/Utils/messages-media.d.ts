@@ -15,10 +15,10 @@ export declare const getRawMediaUploadData: (media: WAMediaUpload, mediaType: Me
 /** generates all the keys required to encrypt/decrypt & sign a media message */
 export declare function getMediaKeys(buffer: Uint8Array | string | null | undefined, mediaType: MediaType): Promise<MediaDecryptionKeyInfo>;
 export declare const extractImageThumb: (bufferOrFilePath: Readable | Buffer | string, width?: number) => Promise<{
-    buffer: any;
+    buffer: Buffer<ArrayBufferLike>;
     original: {
-        width: any;
-        height: any;
+        width: number;
+        height: number;
     };
 }>;
 export declare const encodeBase64EncodedStringForUpload: (b64: string) => string;
