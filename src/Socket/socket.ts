@@ -140,12 +140,11 @@ export const makeSocket = (config: SocketConfig) => {
 	}
 
 	/** log & process any unexpected errors */
-	const onUnexpectedError = unexpectedErrorHandler ? unexpectedErrorHandler : (err: Error | Boom, msg: string) => {
-		logger.error(
-			{ err },
-			`unexpected error in '${msg}'`
-		)
-	}
+	const onUnexpectedError = unexpectedErrorHandler
+		? unexpectedErrorHandler
+		: (err: Error | Boom, msg: string) => {
+				logger.error({ err }, `unexpected error in '${msg}'`)
+			}
 
 	/** await the next incoming message */
 	const awaitNextMessage = async <T>(sendMsg?: Uint8Array) => {
