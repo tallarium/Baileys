@@ -59,9 +59,9 @@ import {
 import { extractGroupMetadata } from './groups'
 import { makeMessagesSocket } from './messages-send'
 
-export const makeMessagesRecvSocket = (config: SocketConfig) => {
+export const makeMessagesRecvSocket = async (config: SocketConfig) => {
 	const { logger, retryRequestDelayMs, maxMsgRetryCount, getMessage, shouldIgnoreJid } = config
-	const sock = makeMessagesSocket(config)
+	const sock = await makeMessagesSocket(config)
 	const {
 		ev,
 		authState,
@@ -820,21 +820,23 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 							return sendMessageAck(node, NACK_REASONS.ParsingError)
 						}
 
-						retryMutex.mutex(async () => {
-							if (ws.isOpen) {
-								if (getBinaryNodeChild(node, 'unavailable')) {
-									return
-								}
+						retryMutex
+							.mutex(async () => {
+								if (ws.isOpen) {
+									if (getBinaryNodeChild(node, 'unavailable')) {
+										return
+									}
 
-								const encNode = getBinaryNodeChild(node, 'enc')
-								await sendRetryRequest(node, !encNode)
-								if (retryRequestDelayMs) {
-									await delay(retryRequestDelayMs)
+									const encNode = getBinaryNodeChild(node, 'enc')
+									await sendRetryRequest(node, !encNode)
+									if (retryRequestDelayMs) {
+										await delay(retryRequestDelayMs)
+									}
+								} else {
+									logger.debug({ node }, 'connection closed, ignoring retry req')
 								}
-							} else {
-								logger.debug({ node }, 'connection closed, ignoring retry req')
-							}
-						})
+							})
+							.catch(e => onUnexpectedError(e, 'retrying message'))
 					} else {
 						// no type in the receipt => message delivered
 						let type: MessageReceiptType = undefined
@@ -1110,7 +1112,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 		if (isOffline) {
 			offlineNodeProcessor.enqueue(type, node)
 		} else {
-			processNodeWithBuffer(node, identifier, exec)
+			void processNodeWithBuffer(node, identifier, exec)
 		}
 	}
 
@@ -1314,7 +1316,7 @@ export const makeMessagesRecvSocket = (config: SocketConfig) => {
 			}
 
 			const protoMsg = proto.WebMessageInfo.fromObject(msg)
-			upsertMessage(protoMsg, call.offline ? 'append' : 'notify')
+			upsertMessage(protoMsg, call.offline ? 'append' : 'notify').catch(e => onUnexpectedError(e, 'upserting call'))
 		}
 	})
 

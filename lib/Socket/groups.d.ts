@@ -1,7 +1,7 @@
 import { proto } from '../../WAProto/index.js';
 import type { GroupMetadata, ParticipantAction, SocketConfig, WAMessageKey } from '../Types';
 import { type BinaryNode } from '../WABinary';
-export declare const makeGroupsSocket: (config: SocketConfig) => {
+export declare const makeGroupsSocket: (config: SocketConfig) => Promise<{
     groupMetadata: (jid: string) => Promise<GroupMetadata>;
     groupCreate: (subject: string, participants: string[]) => Promise<GroupMetadata>;
     groupLeave: (id: string) => Promise<void>;
@@ -126,7 +126,7 @@ export declare const makeGroupsSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 export declare const extractGroupMetadata: (result: BinaryNode) => GroupMetadata;
-export type GroupsSocket = ReturnType<typeof makeGroupsSocket>;
+export type GroupsSocket = Awaited<ReturnType<typeof makeGroupsSocket>>;
 //# sourceMappingURL=groups.d.ts.map

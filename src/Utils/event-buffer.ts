@@ -123,7 +123,9 @@ export const makeEventBuffer = (logger: ILogger): BaileysBufferableEventEmitter 
 	return {
 		process(handler) {
 			const listener = (map: BaileysEventData) => {
-				handler(map)
+				handler(map)?.catch(e =>
+					logger.error(`error when calling handler on ${JSON.stringify(map)}: ${JSON.stringify(e)}`)
+				)
 			}
 
 			ev.on('event', listener)

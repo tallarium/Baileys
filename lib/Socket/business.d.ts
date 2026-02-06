@@ -1,6 +1,6 @@
 import type { GetCatalogOptions, ProductCreate, ProductUpdate, SocketConfig } from '../Types';
 import { type BinaryNode } from '../WABinary';
-export declare const makeBusinessSocket: (config: SocketConfig) => {
+export declare const makeBusinessSocket: (config: SocketConfig) => Promise<{
     logger: import("../Utils/logger").ILogger;
     getOrderDetails: (orderId: string, tokenBase64: string) => Promise<import("../Types").OrderDetails>;
     getCatalog: ({ jid, limit, cursor }: GetCatalogOptions) => Promise<{
@@ -172,5 +172,5 @@ export declare const makeBusinessSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=business.d.ts.map

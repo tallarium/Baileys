@@ -68,5 +68,7 @@ export default defineConfig([globalIgnores([
         "@typescript-eslint/no-unused-vars": ["error", {
             caughtErrors: "none",
         }],
+        "@typescript-eslint/no-misused-promises": ["error"],
+        "@typescript-eslint/no-floating-promises": ["error"],
     },
 }]);

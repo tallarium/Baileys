@@ -58,7 +58,7 @@ export default function queueJob<T>(bucket: string | number, awaitable: () => Pr
 	})
 
 	if (inactive) {
-		_asyncQueueExecutor(queue, () => _queueAsyncBuckets.delete(bucket))
+		void _asyncQueueExecutor(queue, () => _queueAsyncBuckets.delete(bucket))
 	}
 
 	return job

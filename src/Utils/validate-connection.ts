@@ -99,8 +99,8 @@ export const generateRegistrationNode = (
 			supportHostedGroupMsg: true,
 			supportFbidBotChatHistory: true,
 			supportAddOnHistorySyncMigration: undefined,
-			supportMessageAssociation: true,
-		},
+			supportMessageAssociation: true
+		}
 	}
 
 	const companionProto = proto.DeviceProps.encode(companion).finish()

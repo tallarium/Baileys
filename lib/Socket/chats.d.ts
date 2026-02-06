@@ -4,7 +4,7 @@ import type { BotListInfo, ChatModification, MessageUpsertType, SocketConfig, WA
 import type { LabelActionBody } from '../Types/Label';
 import { type BinaryNode } from '../WABinary';
 import { USyncQuery } from '../WAUSync';
-export declare const makeChatsSocket: (config: SocketConfig) => {
+export declare const makeChatsSocket: (config: SocketConfig) => Promise<{
     getBotListV2: () => Promise<BotListInfo[]>;
     processingMutex: {
         mutex<T>(code: () => Promise<T> | T): Promise<T>;
@@ -88,5 +88,5 @@ export declare const makeChatsSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=chats.d.ts.map

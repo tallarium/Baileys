@@ -1,5 +1,5 @@
 import type { UserFacingSocketConfig } from '../Types';
-declare const makeWASocket: (config: UserFacingSocketConfig) => {
+declare const makeWASocket: (config: UserFacingSocketConfig) => Promise<{
     communityMetadata: (jid: string) => Promise<import("../Types").GroupMetadata>;
     communityCreate: (subject: string, body: string) => Promise<import("../Types").GroupMetadata | null>;
     communityLeave: (id: string) => Promise<void>;
@@ -201,6 +201,6 @@ declare const makeWASocket: (config: UserFacingSocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 export default makeWASocket;
 //# sourceMappingURL=index.d.ts.map

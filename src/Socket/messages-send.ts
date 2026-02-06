@@ -50,7 +50,7 @@ import { makeGroupsSocket } from './groups'
 import type { NewsletterSocket } from './newsletter'
 import { makeNewsletterSocket } from './newsletter'
 
-export const makeMessagesSocket = (config: SocketConfig) => {
+export const makeMessagesSocket = async (config: SocketConfig) => {
 	const {
 		logger,
 		linkPreviewImageThumbnailWidth,
@@ -59,7 +59,8 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		patchMessageBeforeSending,
 		cachedGroupMetadata
 	} = config
-	const sock: NewsletterSocket = makeNewsletterSocket(makeGroupsSocket(config))
+	const groupsSock = await makeGroupsSocket(config)
+	const sock: NewsletterSocket = makeNewsletterSocket(groupsSock)
 	const {
 		ev,
 		authState,
@@ -70,7 +71,8 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 		fetchPrivacySettings,
 		sendNode,
 		groupMetadata,
-		groupToggleEphemeral
+		groupToggleEphemeral,
+		onUnexpectedError
 	} = sock
 
 	const userDevicesCache =
@@ -865,7 +867,9 @@ export const makeMessagesSocket = (config: SocketConfig) => {
 				})
 				if (config.emitOwnEvents) {
 					process.nextTick(() => {
-						processingMutex.mutex(() => upsertMessage(fullMsg, 'append'))
+						processingMutex
+							.mutex(() => upsertMessage(fullMsg, 'append'))
+							.catch(e => onUnexpectedError(e, 'sending message'))
 					})
 				}
 
