@@ -825,7 +825,7 @@ export const makeMessagesRecvSocket = async (config: SocketConfig) => {
 						}
 						const isPreKeyError = errorMessage.includes('PreKey')
 
-						console.debug(`[handleMessage] Attempting retry request for failed decryption`)
+						logger.debug(`[handleMessage] Attempting retry request for failed decryption`)
 
 						// Handle both pre-key and normal retries in single mutex
 						retryMutex.mutex(async() => {
