@@ -823,53 +823,56 @@ export const makeMessagesRecvSocket = async (config: SocketConfig) => {
 						if (errorMessage === MISSING_KEYS_ERROR_TEXT) {
 							return sendMessageAck(node, NACK_REASONS.ParsingError)
 						}
+
 						const isPreKeyError = errorMessage.includes('PreKey')
 
 						logger.debug(`[handleMessage] Attempting retry request for failed decryption`)
 
 						// Handle both pre-key and normal retries in single mutex
-						retryMutex.mutex(async() => {
-							try {
-								if (!ws.isOpen) {
-									logger.debug({ node }, 'Connection closed, skipping retry')
-									return
-								}
-
-								if (getBinaryNodeChild(node, 'unavailable')) {
-									logger.debug('Message unavailable, skipping retry')
-									return
-								}
-
-								// Handle pre-key errors with upload and delay
-								if (isPreKeyError) {
-									logger.info({ error: errorMessage }, 'PreKey error detected, uploading and retrying')
-
-									try {
-										logger.debug('Uploading pre-keys for error recovery')
-										await uploadPreKeys(5)
-										logger.debug('Waiting for server to process new pre-keys')
-										await delay(1000)
-									} catch (uploadErr) {
-										logger.error({ uploadErr }, 'Pre-key upload failed, proceeding with retry anyway')
-									}
-								}
-
-								const encNode = getBinaryNodeChild(node, 'enc')
-								await sendRetryRequest(node, !encNode)
-								if (retryRequestDelayMs) {
-									await delay(retryRequestDelayMs)
-								}
-							} catch (err) {
-								logger.error({ err, isPreKeyError }, 'Failed to handle retry, attempting basic retry')
-								// Still attempt retry even if pre-key upload failed
+						retryMutex
+							.mutex(async () => {
 								try {
+									if (!ws.isOpen) {
+										logger.debug({ node }, 'Connection closed, skipping retry')
+										return
+									}
+
+									if (getBinaryNodeChild(node, 'unavailable')) {
+										logger.debug('Message unavailable, skipping retry')
+										return
+									}
+
+									// Handle pre-key errors with upload and delay
+									if (isPreKeyError) {
+										logger.info({ error: errorMessage }, 'PreKey error detected, uploading and retrying')
+
+										try {
+											logger.debug('Uploading pre-keys for error recovery')
+											await uploadPreKeys(5)
+											logger.debug('Waiting for server to process new pre-keys')
+											await delay(1000)
+										} catch (uploadErr) {
+											logger.error({ uploadErr }, 'Pre-key upload failed, proceeding with retry anyway')
+										}
+									}
+
 									const encNode = getBinaryNodeChild(node, 'enc')
 									await sendRetryRequest(node, !encNode)
-								} catch (retryErr) {
-									logger.error({ retryErr }, 'Failed to send retry after error handling')
+									if (retryRequestDelayMs) {
+										await delay(retryRequestDelayMs)
+									}
+								} catch (err) {
+									logger.error({ err, isPreKeyError }, 'Failed to handle retry, attempting basic retry')
+									// Still attempt retry even if pre-key upload failed
+									try {
+										const encNode = getBinaryNodeChild(node, 'enc')
+										await sendRetryRequest(node, !encNode)
+									} catch (retryErr) {
+										logger.error({ retryErr }, 'Failed to send retry after error handling')
+									}
 								}
-							}
-						}).catch(e => onUnexpectedError(e, 'retrying message'))
+							})
+							.catch(e => onUnexpectedError(e, 'retrying message'))
 					} else {
 						// no type in the receipt => message delivered
 						let type: MessageReceiptType = undefined
