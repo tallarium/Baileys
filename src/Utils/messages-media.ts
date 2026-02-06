@@ -1,12 +1,14 @@
 import { Boom } from '@hapi/boom'
+import decoder from 'audio-decode'
 import axios, { type AxiosRequestConfig } from 'axios'
 import { exec } from 'child_process'
 import * as Crypto from 'crypto'
 import { once } from 'events'
 import { createReadStream, createWriteStream, promises as fs, WriteStream } from 'fs'
-import type { IAudioMetadata } from 'music-metadata'
+import musicMetadata, { IAudioMetadata } from 'music-metadata'
 import { tmpdir } from 'os'
 import { join } from 'path'
+import sharp from 'sharp'
 import { Readable, Transform } from 'stream'
 import { URL } from 'url'
 import { proto } from '../../WAProto/index.js'
@@ -30,21 +32,6 @@ import { generateMessageIDV2 } from './generics'
 import type { ILogger } from './logger'
 
 const getTmpFilesDirectory = () => tmpdir()
-
-const getImageProcessingLibrary = async () => {
-	//@ts-ignore
-	const [jimp, sharp] = await Promise.all([import('jimp').catch(() => {}), import('sharp').catch(() => {})])
-
-	if (sharp) {
-		return { sharp }
-	}
-
-	if (jimp) {
-		return { jimp }
-	}
-
-	throw new Boom('No image processing library available')
-}
 
 export const hkdfInfoKey = (type: MediaType) => {
 	const hkdfInfo = MEDIA_HKDF_KEY_MAPPING[type]
@@ -139,34 +126,16 @@ export const extractImageThumb = async (bufferOrFilePath: Readable | Buffer | st
 		bufferOrFilePath = await toBuffer(bufferOrFilePath)
 	}
 
-	const lib = await getImageProcessingLibrary()
-	if ('sharp' in lib && typeof lib.sharp?.default === 'function') {
-		const img = lib.sharp.default(bufferOrFilePath)
-		const dimensions = await img.metadata()
+	const img = sharp(bufferOrFilePath)
+	const dimensions = await img.metadata()
 
-		const buffer = await img.resize(width).jpeg({ quality: 50 }).toBuffer()
-		return {
-			buffer,
-			original: {
-				width: dimensions.width,
-				height: dimensions.height
-			}
+	const buffer = await img.resize(width).jpeg({ quality: 50 }).toBuffer()
+	return {
+		buffer,
+		original: {
+			width: dimensions.width,
+			height: dimensions.height
 		}
-	} else if ('jimp' in lib && typeof lib.jimp?.Jimp === 'object') {
-		const jimp = await (lib.jimp.Jimp as any).read(bufferOrFilePath)
-		const dimensions = {
-			width: jimp.width,
-			height: jimp.height
-		}
-		const buffer = await jimp
-			.resize({ w: width, mode: lib.jimp.ResizeStrategy.BILINEAR })
-			.getBuffer('image/jpeg', { quality: 50 })
-		return {
-			buffer,
-			original: dimensions
-		}
-	} else {
-		throw new Boom('No image processing library available')
 	}
 }
 
@@ -190,25 +159,12 @@ export const generateProfilePicture = async (
 		buffer = await toBuffer(stream)
 	}
 
-	const lib = await getImageProcessingLibrary()
-	let img: Promise<Buffer>
-	if ('sharp' in lib && typeof lib.sharp?.default === 'function') {
-		img = lib.sharp
-			.default(buffer)
-			.resize(w, h)
-			.jpeg({
-				quality: 50
-			})
-			.toBuffer()
-	} else if ('jimp' in lib && typeof lib.jimp?.Jimp === 'object') {
-		const jimp = await (lib.jimp.Jimp as any).read(buffer)
-		const min = Math.min(jimp.width, jimp.height)
-		const cropped = jimp.crop({ x: 0, y: 0, w: min, h: min })
-
-		img = cropped.resize({ w, h, mode: lib.jimp.ResizeStrategy.BILINEAR }).getBuffer('image/jpeg', { quality: 50 })
-	} else {
-		throw new Boom('No image processing library available')
-	}
+	const img: Promise<Buffer> = sharp(buffer)
+		.resize(w, h)
+		.jpeg({
+			quality: 50
+		})
+		.toBuffer()
 
 	return {
 		img: await img
@@ -222,7 +178,6 @@ export const mediaMessageSHA256B64 = (message: WAMessageContent) => {
 }
 
 export async function getAudioDuration(buffer: Buffer | string | Readable) {
-	const musicMetadata = await import('music-metadata')
 	let metadata: IAudioMetadata
 	const options = {
 		duration: true
@@ -243,8 +198,6 @@ export async function getAudioDuration(buffer: Buffer | string | Readable) {
  */
 export async function getAudioWaveform(buffer: Buffer | string | Readable, logger?: ILogger) {
 	try {
-		// @ts-ignore
-		const { default: decoder } = await import('audio-decode')
 		let audioData: Buffer
 		if (Buffer.isBuffer(buffer)) {
 			audioData = buffer
@@ -265,7 +218,7 @@ export async function getAudioWaveform(buffer: Buffer | string | Readable, logge
 			const blockStart = blockSize * i // the location of the first sample in the block
 			let sum = 0
 			for (let j = 0; j < blockSize; j++) {
-				sum = sum + Math.abs(rawData[blockStart + j]) // find the sum of all the samples in the block
+				sum = sum + Math.abs(rawData[blockStart + j]!) // find the sum of all the samples in the block
 			}
 
 			filteredData.push(sum / blockSize) // divide the sum by the block size to get the average
