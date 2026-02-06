@@ -3,7 +3,7 @@ import Long from 'long';
 import { proto } from '../../WAProto/index.js';
 import type { MessageReceiptType, MessageRelayOptions, SocketConfig, WAMessageKey } from '../Types';
 import { type BinaryNode } from '../WABinary';
-export declare const makeMessagesRecvSocket: (config: SocketConfig) => {
+export declare const makeMessagesRecvSocket: (config: SocketConfig) => Promise<{
     sendMessageAck: ({ tag, attrs, content }: BinaryNode, errorCode?: number) => Promise<void>;
     sendRetryRequest: (node: BinaryNode, forceIncludeKeys?: boolean) => Promise<void>;
     rejectCall: (callId: string, callFrom: string) => Promise<void>;
@@ -161,5 +161,5 @@ export declare const makeMessagesRecvSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=messages-recv.d.ts.map

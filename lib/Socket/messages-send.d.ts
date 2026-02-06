@@ -3,7 +3,7 @@ import { proto } from '../../WAProto/index.js';
 import type { AnyMessageContent, MediaConnInfo, MessageReceiptType, MessageRelayOptions, MiscMessageGenerationOptions, SocketConfig, WAMessageKey } from '../Types';
 import { type BinaryNode, type JidWithDevice } from '../WABinary';
 import { USyncQuery } from '../WAUSync';
-export declare const makeMessagesSocket: (config: SocketConfig) => {
+export declare const makeMessagesSocket: (config: SocketConfig) => Promise<{
     getPrivacyTokens: (jids: string[]) => Promise<any>;
     assertSessions: (jids: string[], force: boolean) => Promise<boolean>;
     relayMessage: (jid: string, message: proto.IMessage, { messageId: msgId, participant, additionalAttributes, additionalNodes, useUserDevicesCache, useCachedGroupMetadata, statusJidList }: MessageRelayOptions) => Promise<string>;
@@ -156,5 +156,5 @@ export declare const makeMessagesSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=messages-send.d.ts.map

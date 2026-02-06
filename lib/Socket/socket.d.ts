@@ -8,7 +8,7 @@ import { WebSocketClient } from './Client';
  * - listen to messages and emit events
  * - query phone connection
  */
-export declare const makeSocket: (config: SocketConfig) => {
+export declare const makeSocket: (config: SocketConfig) => Promise<{
     type: "md";
     ws: WebSocketClient;
     ev: import("../Types").BaileysEventEmitter & {
@@ -39,5 +39,5 @@ export declare const makeSocket: (config: SocketConfig) => {
     /** Waits for the connection to WA to reach a state */
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=socket.d.ts.map

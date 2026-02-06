@@ -1,7 +1,7 @@
 import { proto } from '../../WAProto/index.js';
 import { type GroupMetadata, type ParticipantAction, type SocketConfig, type WAMessageKey } from '../Types';
 import { type BinaryNode } from '../WABinary';
-export declare const makeCommunitiesSocket: (config: SocketConfig) => {
+export declare const makeCommunitiesSocket: (config: SocketConfig) => Promise<{
     communityMetadata: (jid: string) => Promise<GroupMetadata>;
     communityCreate: (subject: string, body: string) => Promise<GroupMetadata | null>;
     communityLeave: (id: string) => Promise<void>;
@@ -214,6 +214,6 @@ export declare const makeCommunitiesSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 export declare const extractCommunityMetadata: (result: BinaryNode) => GroupMetadata;
 //# sourceMappingURL=communities.d.ts.map

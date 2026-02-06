@@ -2,7 +2,7 @@ import { Boom } from '@hapi/boom';
 import type { SocketConfig } from '../Types';
 import { type BinaryNode } from '../WABinary';
 import { USyncQuery } from '../WAUSync';
-export declare const makeUSyncSocket: (config: SocketConfig) => {
+export declare const makeUSyncSocket: (config: SocketConfig) => Promise<{
     executeUSyncQuery: (usyncQuery: USyncQuery) => Promise<import("../WAUSync").USyncQueryResult | undefined>;
     type: "md";
     ws: import("./Client").WebSocketClient;
@@ -33,5 +33,5 @@ export declare const makeUSyncSocket: (config: SocketConfig) => {
     requestPairingCode: (phoneNumber: string, customPairingCode?: string) => Promise<string>;
     waitForConnectionUpdate: (check: (u: Partial<import("../Types").ConnectionState>) => Promise<boolean | undefined>, timeoutMs?: number) => Promise<void>;
     sendWAMBuffer: (wamBuffer: Buffer) => Promise<any>;
-};
+}>;
 //# sourceMappingURL=usync.d.ts.map
